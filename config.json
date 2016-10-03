@@ -3,12 +3,12 @@
   "KeyValStore" :"keyValStore",
   "deployWaitTime": "40",
   "ca": {
-    "ca_url":"grpc://localhost:7054"
+    "ca_url":"grpc://127.0.0.1:7054"
   },
   "peers":[
     {
       "name":"vp0",
-      "peer_url":"grpc://localhost:7051"
+      "peer_url":"grpc://127.0.0.1:30001"
     }
   ],
   "users": [

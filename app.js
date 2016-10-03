@@ -5,6 +5,11 @@ var fs = require('fs');
 
 
 var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+var nTrans = 0;
+var nFailed = 0;
+var tStamp = 0;
+var oFile = fs.createWriteStream('results.txt');
+var buff;
 
 
 // Create a client chain.
@@ -131,6 +136,7 @@ function deployChaincode() {
     });
 }
 
+
 function invoke() {
     var args = getArgs(config.invokeRequest);
     // Construct the invoke request
@@ -146,13 +152,29 @@ function invoke() {
     // Trigger the invoke transaction
     var invokeTx = deployer.invoke(invokeRequest);
 
-    invokeTx.on('complete', function(results) {
+    nTrans++;
+    tStamp = new Date().getTime();
+    buff = 'tran#:' + nTrans + ' Failed:' + nFailed + ' time:'+ tStamp + '\n';
+
+    fs.appendFile('results.txt', buff, function(err) {
+        if (err) {
+           return console.log(err);
+        }
+    })
+
+
+    invokeTx.on('submitted', function(results) {
         // Invoke transaction completed?
-        console.log(util.format("completed chaincode invoke transaction: request=%j, response=%j\n", invokeRequest, results));
+        console.log(util.format("completed chaincode invoke submission: request=%j, response=%j\n", invokeRequest, results));
+        setTimeout(function() {
+           invoke();
+        }, 1000);
     });
     invokeTx.on('error', function(err) {
+        nFailed++;
         // Invoke transaction submission failed
         console.log(util.format("Failed to submit chaincode invoke transaction: request=%j, error=%j\n", invokeRequest, err));
+        invoke();
     });
 }
 
